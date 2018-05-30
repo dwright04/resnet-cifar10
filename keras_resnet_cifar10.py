@@ -6,7 +6,13 @@ from keras.regularizers import l2
 from keras.layers import Input, Conv2D, Dense
 from keras.layers import GlobalAveragePooling2D
 from keras.layers import BatchNormalization
+from keras.callbacks import CSVLogger, LearningRateScheduler
 from keras.preprocessing.image import ImageDataGenerator
+
+def learning_rate_scheduler(epoch):
+  if epoch in [31999, 47999]:
+    model.lr.set_value(model.lr.get_value()/10.)
+  return model.lr.get_value()
 
 def build_plain_architecture():
   '''
@@ -55,30 +61,15 @@ def train_plain_architecture(x, y, x_valid, y_valid, datagen, valid_datagen):
 
   model = build_plain_architecture()
 
+  callbacks = [CSVLogger('./logs/keras_plain_cifar10.log'), \
+              LearningRateScheduler(learning_rate_scheduler)]
+
   model.fit_generator(datagen.flow(x, y, batch_size=128), \
     validation_data=valid_datagen.flow(x_valid, y_valid), \
     validation_steps=x_valid.shape[0]/128, \
-    steps_per_epoch=x.shape[0]/128, epochs=32000)
+    callbacks=callbacks, steps_per_epoch=x.shape[0]/128, epochs=64000)
 
-  # after 32k iterations divide learning rate by 10
-  model.compile(optimizer=SGD(lr=0.01, decay=0.0001, momentum=0.9), \
-    loss='categorical_crossentropy')
-    
-  model.fit_generator(datagen.flow(x, y, batch_size=128), \
-    validation_data=valid_datagen.flow(x_valid, y_valid), \
-    validation_steps=x_valid.shape[0]/128, \
-    steps_per_epoch=x.shape[0]/128, epochs=16000)
-
-  # after 48k iterations divide learning rate by 10
-  model.compile(optimizer=SGD(lr=0.001, decay=0.0001, momentum=0.9), \
-    loss='categorical_crossentropy')
-    
-  model.fit_generator(datagen.flow(x, y, batch_size=128), \
-    validation_data=valid_datagen.flow(x_valid, y_valid), \
-    validation_steps=x_valid.shape[0]/128, \
-    steps_per_epoch=x.shape[0]/128, epochs=16000)
-
-  model.save('keras_plain_cifar10.h5')
+  model.save('./models/keras_plain_cifar10.h5')
   return model
 
 def train_residual_architecture(datagen):
