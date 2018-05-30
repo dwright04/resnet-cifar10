@@ -77,7 +77,8 @@ def train_plain_architecture(x, y, x_valid, y_valid, datagen, valid_datagen):
     validation_data=valid_datagen.flow(x_valid, y_valid), \
     validation_steps=x_valid.shape[0]/128, \
     steps_per_epoch=x.shape[0]/128, epochs=16000)
-    
+
+  model.save('keras_plain_cifar10.h5')
   return model
 
 def train_residual_architecture(datagen):
@@ -117,7 +118,7 @@ def main():
 
   valid_datagen.fit(x_valid)
 
-  train_plain_architecture(x_train, y_train, x_valid, y_valid, train_datagen, valid_datagen)
+  model = train_plain_architecture(x_train, y_train, x_valid, y_valid, train_datagen, valid_datagen)
 
 if __name__ == '__main__':
   main()
