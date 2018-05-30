@@ -10,9 +10,13 @@ from keras.callbacks import CSVLogger, LearningRateScheduler
 from keras.preprocessing.image import ImageDataGenerator
 
 def learning_rate_scheduler(epoch):
-  if epoch in [31999, 47999]:
-    model.lr.set_value(model.lr.get_value()/10.)
-  return model.lr.get_value()
+  if epoch >= 31999:
+    return 0.01
+  elif epoch >= 47999:
+    return 0.001
+  else:
+   return 0.1
+
 
 def build_plain_architecture():
   '''
